@@ -10,7 +10,7 @@ import authRouter from "./routes/authRouter.js";
 // import categoryRouter from "./routes/categoriesRouter.js";
 // import areasRouter from "./routes/areasRouter.js";
 // import ingredientRouter from "./routes/ingredientsRouter.js";
-// import testimonialRouter from "./routes/testimonialsRouter.js";
+import testimonialRouter from "./routes/testimonialsRouter.js";
 // import recipeRouter from "./routes/recipesRouter.js";
 
 import notFoundHandler from "./middlewares/notFoundHandler.js";
@@ -28,7 +28,7 @@ app.use("/api/auth", authRouter);
 // app.use("/api/categories", categoryRouter);
 // app.use("/api/areas", areasRouter);
 // app.use("/api/ingredients", ingredientRouter);
-// app.use("/api/testimonials", testimonialRouter);
+app.use("/api/testimonials", testimonialRouter);
 // app.use("/api/recipes", recipeRouter);
 
 app.use(notFoundHandler);
