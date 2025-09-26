@@ -6,7 +6,7 @@ import "dotenv/config";
 import "./db/sequelize.js";
 
 import authRouter from "./routes/authRouter.js";
-// import userRouter from "./routes/usersRouter.js";
+import usersRouter from "./routes/usersRouter.js";
 // import categoryRouter from "./routes/categoriesRouter.js";
 // import areasRouter from "./routes/areasRouter.js";
 // import ingredientRouter from "./routes/ingredientsRouter.js";
@@ -24,7 +24,7 @@ app.use(express.json());
 app.use(express.static("public"));
 
 app.use("/api/auth", authRouter);
-// app.use("/api/users", userRouter);
+app.use("/api/users", usersRouter);
 // app.use("/api/categories", categoryRouter);
 // app.use("/api/areas", areasRouter);
 // app.use("/api/ingredients", ingredientRouter);
