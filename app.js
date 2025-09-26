@@ -16,6 +16,8 @@ import testimonialRouter from "./routes/testimonialsRouter.js";
 import notFoundHandler from "./middlewares/notFoundHandler.js";
 import errorHandler from "./middlewares/errorHandler.js";
 
+import { swaggerDocs } from "./config/swagger.js";
+
 const app = express();
 
 app.use(morgan("tiny"));
@@ -30,6 +32,9 @@ app.use("/api/users", usersRouter);
 // app.use("/api/ingredients", ingredientRouter);
 app.use("/api/testimonials", testimonialRouter);
 // app.use("/api/recipes", recipeRouter);
+
+// Swagger docs
+swaggerDocs(app);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
