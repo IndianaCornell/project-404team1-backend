@@ -31,6 +31,15 @@ const User = sequelize.define(
       allowNull: false,
       defaultValue: [],
     },
+    favorites: {
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: false,
+      defaultValue: [],
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
   },
   {
     tableName: "users",
