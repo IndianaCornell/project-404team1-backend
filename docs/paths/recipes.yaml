@@ -1,0 +1,135 @@
+recipes-collection:
+  get:
+    tags: [Recipes]
+    summary: Отримати список рецептів
+    parameters:
+      - $ref: "../components/schemas.yaml#/PageParam"
+      - $ref: "../components/schemas.yaml#/LimitParam"
+      - in: query
+        name: category
+        schema: { type: string }
+      - in: query
+        name: ingredient
+        schema: { type: string }
+    responses:
+      "200":
+        description: Масив рецептів
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "../components/schemas.yaml#/Recipe"
+
+  post:
+    tags: [Recipes]
+    summary: Створити новий рецепт
+    security: [{ bearerAuth: [] }]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas.yaml#/RecipeRequest"
+    responses:
+      "201":
+        description: Рецепт створено
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas.yaml#/Recipe"
+      "401":
+        $ref: "../components/responses.yaml#/UnauthorizedError"
+
+recipes-single:
+  get:
+    tags: [Recipes]
+    summary: Деталі рецепта
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    responses:
+      "200":
+        description: Об’єкт рецепта
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas.yaml#/Recipe"
+      "404":
+        $ref: "../components/responses.yaml#/NotFoundError"
+
+  patch:
+    tags: [Recipes]
+    summary: Оновити рецепт
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas.yaml#/RecipeRequest"
+    responses:
+      "200":
+        description: Рецепт оновлено
+      "401":
+        $ref: "../components/responses.yaml#/UnauthorizedError"
+      "404":
+        $ref: "../components/responses.yaml#/NotFoundError"
+
+  delete:
+    tags: [Recipes]
+    summary: Видалити рецепт
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    responses:
+      "200":
+        description: Видалено
+      "401":
+        $ref: "../components/responses.yaml#/UnauthorizedError"
+      "404":
+        $ref: "../components/responses.yaml#/NotFoundError"
+
+recipes-favorite:
+  post:
+    tags: [Favorites]
+    summary: Додати рецепт в улюблені
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    responses:
+      "201":
+        description: Додано
+      "401":
+        $ref: "../components/responses.yaml#/UnauthorizedError"
+      "404":
+        $ref: "../components/responses.yaml#/NotFoundError"
+
+  delete:
+    tags: [Favorites]
+    summary: Видалити рецепт з улюблених
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    responses:
+      "200":
+        description: Видалено
+      "401":
+        $ref: "../components/responses.yaml#/UnauthorizedError"
+      "404":
+        $ref: "../components/responses.yaml#/NotFoundError"

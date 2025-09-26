@@ -1,0 +1,43 @@
+reviews-recipe:
+  get:
+    tags: [Reviews]
+    summary: Отримати відгуки
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    responses:
+      "200":
+        description: Масив відгуків
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "../components/schemas.yaml#/Review"
+      "404":
+        $ref: "../components/responses.yaml#/NotFoundError"
+
+  post:
+    tags: [Reviews]
+    summary: Додати відгук
+    security: [{ bearerAuth: [] }]
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas.yaml#/ReviewRequest"
+    responses:
+      "201":
+        description: Відгук додано
+      "401":
+        $ref: "../components/responses.yaml#/UnauthorizedError"
+      "404":
+        $ref: "../components/responses.yaml#/NotFoundError"

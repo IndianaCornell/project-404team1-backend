@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: Foodies API
+  version: "1.0.0"
+  description: >
+    API для керування рецептами, користувачами, улюбленими та підписками.
+    Використовує JWT авторизацію.
+
+servers:
+  - url: http://localhost:3000/api
+    description: Local server
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+    description: Реєстрація та авторизація користувачів
+  - name: Users
+    description: Керування профілями користувачів
+  - name: Recipes
+    description: CRUD для рецептів
+  - name: Favorites
+    description: Улюблені рецепти
+  - name: Reviews
+    description: Відгуки на рецепти
+
+paths:
+  /auth/register:
+    $ref: ./paths/auth.yaml#/auth-register
+  /auth/login:
+    $ref: ./paths/auth.yaml#/auth-login
+  /users/me:
+    $ref: ./paths/users.yaml#/users-me
+  /users/{id}:
+    $ref: ./paths/users.yaml#/users-byId
+  /recipes:
+    $ref: ./paths/recipes.yaml#/recipes-collection
+  /recipes/{id}:
+    $ref: ./paths/recipes.yaml#/recipes-single
+  /recipes/{id}/favorite:
+    $ref: ./paths/recipes.yaml#/recipes-favorite
+  /recipes/{id}/reviews:
+    $ref: ./paths/reviews.yaml#/reviews-recipe
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
