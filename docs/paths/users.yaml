@@ -1,0 +1,48 @@
+users-me:
+  get:
+    tags: [Users]
+    summary: Отримати профіль поточного користувача
+    security: [{ bearerAuth: [] }]
+    responses:
+      "200":
+        description: Інформація про користувача
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas.yaml#/User"
+      "401":
+        $ref: "../components/responses.yaml#/UnauthorizedError"
+
+  patch:
+    tags: [Users]
+    summary: Оновити профіль
+    security: [{ bearerAuth: [] }]
+    requestBody:
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas.yaml#/UpdateUserRequest"
+    responses:
+      "200":
+        description: Оновлено
+      "401":
+        $ref: "../components/responses.yaml#/UnauthorizedError"
+
+users-byId:
+  get:
+    tags: [Users]
+    summary: Отримати інформацію про іншого користувача
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    responses:
+      "200":
+        description: Інформація про користувача
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas.yaml#/User"
+      "404":
+        $ref: "../components/responses.yaml#/NotFoundError"
