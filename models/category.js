@@ -1,4 +1,4 @@
-import { DataTypes } from "sequelize";
+import {DataTypes} from "sequelize";
 import sequelize from "../db/sequelize.js";
 
 const Category = sequelize.define(
@@ -13,6 +13,11 @@ const Category = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
+    },
+    image: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: false,
     },
   },
   {
