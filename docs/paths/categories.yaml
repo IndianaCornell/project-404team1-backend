@@ -1,0 +1,15 @@
+categories-collection:
+  get:
+    tags: [Categories]
+    summary: Отримати всі категорії рецептів
+    security: []
+    responses:
+      "200":
+        description: Список категорій
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "../components/schemas.yaml#/Category"
+

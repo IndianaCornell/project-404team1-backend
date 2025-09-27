@@ -20,6 +20,8 @@ tags:
     description: Керування профілями користувачів
   - name: Recipes
     description: CRUD для рецептів
+  - name: Categories
+    description: Категорії страв
   - name: Favorites
     description: Улюблені рецепти
   - name: Reviews
@@ -34,14 +36,22 @@ paths:
     $ref: ./paths/users.yaml#/users-me
   /users/{id}:
     $ref: ./paths/users.yaml#/users-byId
+  /categories:
+    $ref: ./paths/categories.yaml#/categories-collection
   /recipes:
     $ref: ./paths/recipes.yaml#/recipes-collection
+  /recipes/popular:
+    $ref: ./paths/recipes.yaml#/recipes-popular
+  /recipes/my:
+    $ref: ./paths/recipes.yaml#/recipes-my
   /recipes/{id}:
     $ref: ./paths/recipes.yaml#/recipes-single
   /recipes/{id}/favorite:
     $ref: ./paths/recipes.yaml#/recipes-favorite
   /recipes/{id}/reviews:
     $ref: ./paths/reviews.yaml#/reviews-recipe
+  /favorites:
+    $ref: ./paths/favorites.yaml#/favorites-collection
 
 components:
   securitySchemes:
