@@ -3,7 +3,10 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build-docs": "redocly bundle docs/openapi.yaml -o docs/swagger.json",
+    "preview-docs": "redocly preview-docs docs/openapi.yaml",
+    "docs:dev": "npm run build-docs && npm run dev"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -26,6 +29,7 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "@redocly/cli": "^2.2.2",
     "nodemon": "^3.0.2"
   }
 }

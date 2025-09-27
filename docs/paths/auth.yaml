@@ -1,0 +1,37 @@
+auth-register:
+  post:
+    tags: [Auth]
+    summary: Реєстрація користувача
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas.yaml#/RegisterRequest"
+    responses:
+      "201":
+        description: Успішна реєстрація
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas.yaml#/AuthResponse"
+
+auth-login:
+  post:
+    tags: [Auth]
+    summary: Логін користувача
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../components/schemas.yaml#/LoginRequest"
+    responses:
+      "200":
+        description: Успішний логін
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas.yaml#/AuthResponse"
+      "401":
+        $ref: "../components/responses.yaml#/UnauthorizedError"

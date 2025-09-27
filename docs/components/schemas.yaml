@@ -1,0 +1,134 @@
+RegisterRequest:
+  type: object
+  required: [email, password]
+  properties:
+    email:
+      type: string
+      format: email
+      example: user@example.com
+    password:
+      type: string
+      example: secret123
+    name:
+      type: string
+      example: Ivan
+
+LoginRequest:
+  type: object
+  required: [email, password]
+  properties:
+    email:
+      type: string
+      example: user@example.com
+    password:
+      type: string
+      example: secret123
+
+AuthResponse:
+  type: object
+  properties:
+    token:
+      type: string
+      example: jwt_token_here
+    user:
+      $ref: "#/User"
+
+User:
+  type: object
+  properties:
+    id: { type: string, example: usr_123 }
+    name: { type: string, example: Ivan }
+    email: { type: string, example: user@example.com }
+    avatar_url:
+      { type: string, example: https://s.gravatar.com/avatar/abc?s=250 }
+
+UpdateUserRequest:
+  type: object
+  properties:
+    name: { type: string, example: New Name }
+    avatar_url: { type: string, example: https://example.com/avatar.png }
+
+Recipe:
+  type: object
+  properties:
+    id: { type: string, example: rec_123 }
+    title: { type: string, example: Борщ }
+    description: { type: string, example: Традиційний український борщ }
+    instructions: { type: string, example: Додати овочі, зварити 1 годину }
+    image_url: { type: string, example: https://example.com/borch.jpg }
+    category_id: { type: string, example: cat_123 }
+    area_id: { type: string, example: area_ukraine }
+    ingredients:
+      type: array
+      items:
+        $ref: "#/RecipeIngredient"
+
+RecipeRequest:
+  type: object
+  required: [title, description]
+  properties:
+    title: { type: string, example: Борщ }
+    description: { type: string, example: Дуже смачний борщ }
+    instructions: { type: string }
+    image_url: { type: string }
+    category_id: { type: string }
+    area_id: { type: string }
+    ingredients:
+      type: array
+      items:
+        $ref: "#/RecipeIngredient"
+
+RecipeIngredient:
+  type: object
+  properties:
+    ingredient_id: { type: string, example: ing_123 }
+    quantity: { type: string, example: "200 г" }
+
+Review:
+  type: object
+  properties:
+    id: { type: string, example: rev_123 }
+    user_id: { type: string, example: usr_123 }
+    content: { type: string, example: Дуже смачно! }
+    rating:
+      type: integer
+      minimum: 1
+      maximum: 5
+      example: 5
+    created_at:
+      type: string
+      format: date-time
+      example: 2025-09-26T12:00:00Z
+
+ReviewRequest:
+  type: object
+  required: [rating, content]
+  properties:
+    rating:
+      type: integer
+      minimum: 1
+      maximum: 5
+      example: 4
+    content:
+      type: string
+      example: Додав би більше солі :)
+
+# 🔄 Параметри для перевикористання
+PageParam:
+  in: query
+  name: page
+  schema:
+    type: integer
+    minimum: 1
+  description: Номер сторінки
+  example: 1
+
+LimitParam:
+  in: query
+  name: limit
+  schema:
+    type: integer
+    minimum: 1
+    maximum: 100
+  description: Кількість елементів на сторінці
+  example: 10
