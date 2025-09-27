@@ -1,4 +1,4 @@
-import { DataTypes } from "sequelize";
+import {DataTypes} from "sequelize";
 import sequelize from "../db/sequelize.js";
 
 const Recipe = sequelize.define(
@@ -12,6 +12,11 @@ const Recipe = sequelize.define(
     thumb: { type: DataTypes.STRING },
     time: { type: DataTypes.STRING },
     owner: { type: DataTypes.STRING, allowNull: false },
+    favoritesCount: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0
+    },
   },
   {
     timestamps: true,

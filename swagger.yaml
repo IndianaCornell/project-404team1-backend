@@ -10,9 +10,6 @@ servers:
   - url: http://localhost:3000/api
     description: Local server
 
-# 🔐 Глобальна безпека — JWT для всіх ендпоінтів
-security:
-  - bearerAuth: []
 
 tags:
   - name: Auth
@@ -39,6 +36,7 @@ paths:
     post:
       tags: [Auth]
       summary: Реєстрація користувача
+      security: []
       requestBody:
         required: true
         content:
@@ -57,6 +55,7 @@ paths:
     post:
       tags: [Auth]
       summary: Логін користувача
+      security: []
       requestBody:
         required: true
         content:
@@ -108,23 +107,40 @@ paths:
               schema:
                 $ref: "#/components/schemas/User"
 
-  /recipes:
+  /categories:
     get:
-      tags: [Recipes]
-      summary: Отримати список рецептів
-      parameters:
-        - $ref: "#/components/parameters/CategoryParam"
-        - $ref: "#/components/parameters/IngredientParam"
-        - $ref: "#/components/parameters/PageParam"
+      tags: [Categories]
+      summary: Отримати всі категорії рецептів
+      security: []
       responses:
         "200":
-          description: Масив рецептів
+          description: Список категорій
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Recipe"
+                  $ref: "#/components/schemas/Category"
+
+  /recipes:
+    get:
+      tags: [Recipes]
+      summary: Пошук рецептів з фільтрами та пагінацією
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/CategoryParam"
+        - $ref: "#/components/parameters/IngredientParam"
+        - $ref: "#/components/parameters/AreaParam"
+        - $ref: "#/components/parameters/SearchParam"
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Пагінований список рецептів
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedRecipes"
     post:
       tags: [Recipes]
       summary: Створити новий рецепт
@@ -142,40 +158,65 @@ paths:
               schema:
                 $ref: "#/components/schemas/Recipe"
 
+  /recipes/popular:
+    get:
+      tags: [Recipes]
+      summary: Отримати популярні рецепти
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Пагінований список популярних рецептів
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedRecipes"
+
+  /recipes/my:
+    get:
+      tags: [Recipes]
+      summary: Отримати рецепти поточного користувача
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Пагінований список власних рецептів
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedRecipes"
+
   /recipes/{id}:
     get:
       tags: [Recipes]
       summary: Деталі рецепта
+      security: []
       parameters:
         - $ref: "#/components/parameters/RecipeId"
       responses:
         "200":
-          description: Об’єкт рецепта
+          description: Об'єкт рецепта
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Recipe"
-    patch:
-      tags: [Recipes]
-      summary: Оновити рецепт
-      parameters:
-        - $ref: "#/components/parameters/RecipeId"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RecipeRequest"
-      responses:
-        "200":
-          description: Рецепт оновлено
+        "404":
+          description: Рецепт не знайдено
     delete:
       tags: [Recipes]
-      summary: Видалити рецепт
+      summary: Видалити власний рецепт
       parameters:
         - $ref: "#/components/parameters/RecipeId"
       responses:
-        "200":
-          description: Видалено
+        "204":
+          description: Рецепт видалено
+        "403":
+          description: Можна видаляти лише власні рецепти
+        "404":
+          description: Рецепт не знайдено
 
   /recipes/{id}/favorite:
     post:
@@ -184,8 +225,18 @@ paths:
       parameters:
         - $ref: "#/components/parameters/RecipeId"
       responses:
-        "201":
-          description: Додано
+        "200":
+          description: Рецепт додано до улюблених
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Recipe added to favorites
+        "404":
+          description: Рецепт не знайдено
     delete:
       tags: [Favorites]
       summary: Видалити рецепт з улюблених
@@ -193,12 +244,36 @@ paths:
         - $ref: "#/components/parameters/RecipeId"
       responses:
         "200":
-          description: Видалено
+          description: Рецепт видалено з улюблених
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Recipe removed from favorites
+
+  /favorites:
+    get:
+      tags: [Favorites]
+      summary: Отримати улюблені рецепти користувача
+      parameters:
+        - $ref: "#/components/parameters/PageParam"
+        - $ref: "#/components/parameters/LimitParam"
+      responses:
+        "200":
+          description: Пагінований список улюблених рецептів
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedRecipes"
 
   /recipes/{id}/reviews:
     get:
       tags: [Reviews]
       summary: Отримати відгуки
+      security: []
       parameters:
         - $ref: "#/components/parameters/RecipeId"
       responses:
@@ -253,11 +328,26 @@ components:
       name: ingredient
       schema: { type: string }
       description: Фільтр за інгредієнтом
+    AreaParam:
+      in: query
+      name: area
+      schema: { type: string }
+      description: Фільтр за регіоном
+    SearchParam:
+      in: query
+      name: q
+      schema: { type: string }
+      description: Текстовий пошук по назві, опису та інструкціях
     PageParam:
       in: query
       name: page
-      schema: { type: integer, minimum: 1 }
+      schema: { type: integer, minimum: 1, default: 1 }
       description: Номер сторінки
+    LimitParam:
+      in: query
+      name: limit
+      schema: { type: integer, minimum: 1, maximum: 100, default: 12 }
+      description: Кількість елементів на сторінці
 
   schemas:
     RegisterRequest:
@@ -303,46 +393,117 @@ components:
           type: string
         email:
           type: string
-        avatar_url:
+        avatar:
           type: string
+        followers:
+          type: array
+          items:
+            type: string
+        following:
+          type: array
+          items:
+            type: string
+        favorites:
+          type: array
+          items:
+            type: string
 
     UpdateUserRequest:
       type: object
       properties:
         name:
           type: string
-        avatar_url:
+        avatar:
           type: string
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: Pasta
 
     Recipe:
       type: object
       properties:
-        id: { type: string }
-        title: { type: string }
-        description: { type: string }
-        instructions: { type: string }
-        image_url: { type: string }
-        category_id: { type: string }
-        area_id: { type: string }
-        ingredients:
-          type: array
-          items:
-            $ref: "#/components/schemas/RecipeIngredient"
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          example: Classic Spaghetti Carbonara
+        category:
+          type: string
+          example: Pasta
+        area:
+          type: string
+          example: Italian
+        instructions:
+          type: string
+        description:
+          type: string
+        thumb:
+          type: string
+          format: uri
+        time:
+          type: string
+          example: 20 minutes
+        owner:
+          type: string
+        favoritesCount:
+          type: integer
+          minimum: 0
+          example: 15
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
 
     RecipeRequest:
       type: object
-      required: [title, description]
+      required: [title, category]
       properties:
-        title: { type: string }
-        description: { type: string }
-        instructions: { type: string }
-        image_url: { type: string }
-        category_id: { type: string }
-        area_id: { type: string }
-        ingredients:
+        title:
+          type: string
+          example: Classic Spaghetti Carbonara
+        category:
+          type: string
+          example: Pasta
+        area:
+          type: string
+          example: Italian
+        instructions:
+          type: string
+        description:
+          type: string
+        thumb:
+          type: string
+          format: uri
+        time:
+          type: string
+          example: 20 minutes
+
+    PaginatedRecipes:
+      type: object
+      properties:
+        items:
           type: array
           items:
-            $ref: "#/components/schemas/RecipeIngredient"
+            $ref: "#/components/schemas/Recipe"
+        total:
+          type: integer
+          example: 150
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 12
 
     RecipeIngredient:
       type: object
@@ -374,3 +535,7 @@ components:
           maximum: 5
         content:
           type: string
+
+# Global security for all endpoints except those explicitly marked with security: []
+security:
+  - bearerAuth: []
