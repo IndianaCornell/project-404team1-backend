@@ -1,0 +1,17 @@
+favorites-collection:
+  get:
+    tags: [Favorites]
+    summary: Отримати улюблені рецепти користувача
+    parameters:
+      - $ref: "../components/schemas.yaml#/PageParam"
+      - $ref: "../components/schemas.yaml#/LimitParam"
+    responses:
+      "200":
+        description: Пагінований список улюблених рецептів
+        content:
+          application/json:
+            schema:
+              $ref: "../components/schemas.yaml#/PaginatedRecipes"
+      "401":
+        $ref: "../components/responses.yaml#/UnauthorizedError"
+

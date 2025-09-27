@@ -52,37 +52,66 @@ Recipe:
   type: object
   properties:
     id: { type: string, example: rec_123 }
-    title: { type: string, example: Борщ }
-    description: { type: string, example: Традиційний український борщ }
+    title: { type: string, example: Classic Spaghetti Carbonara }
+    category: { type: string, example: Pasta }
+    area: { type: string, example: Italian }
+    description: { type: string, example: Традиційний італійський рецепт }
     instructions: { type: string, example: Додати овочі, зварити 1 годину }
-    image_url: { type: string, example: https://example.com/borch.jpg }
-    category_id: { type: string, example: cat_123 }
-    area_id: { type: string, example: area_ukraine }
-    ingredients:
-      type: array
-      items:
-        $ref: "#/RecipeIngredient"
+    thumb: { type: string, example: https://example.com/carbonara.jpg }
+    time: { type: string, example: 20 minutes }
+    owner: { type: string, example: usr_123 }
+    favoritesCount:
+      type: integer
+      minimum: 0
+      example: 15
+    createdAt:
+      type: string
+      format: date-time
+      example: 2025-09-26T12:00:00Z
+    updatedAt:
+      type: string
+      format: date-time
+      example: 2025-09-26T12:00:00Z
 
 RecipeRequest:
   type: object
-  required: [title, description]
+  required: [title, category]
   properties:
-    title: { type: string, example: Борщ }
-    description: { type: string, example: Дуже смачний борщ }
+    title: { type: string, example: Classic Spaghetti Carbonara }
+    category: { type: string, example: Pasta }
+    area: { type: string, example: Italian }
+    description: { type: string, example: Дуже смачна паста }
     instructions: { type: string }
-    image_url: { type: string }
-    category_id: { type: string }
-    area_id: { type: string }
-    ingredients:
-      type: array
-      items:
-        $ref: "#/RecipeIngredient"
+    thumb: { type: string, format: uri }
+    time: { type: string, example: 20 minutes }
 
-RecipeIngredient:
+Category:
   type: object
   properties:
-    ingredient_id: { type: string, example: ing_123 }
-    quantity: { type: string, example: "200 г" }
+    id:
+      type: string
+      format: uuid
+      example: cat_123
+    name:
+      type: string
+      example: Pasta
+
+PaginatedRecipes:
+  type: object
+  properties:
+    items:
+      type: array
+      items:
+        $ref: "#/Recipe"
+    total:
+      type: integer
+      example: 150
+    page:
+      type: integer
+      example: 1
+    limit:
+      type: integer
+      example: 12
 
 Review:
   type: object
