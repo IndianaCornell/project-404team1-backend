@@ -9,23 +9,16 @@ import {
   unfollowUser,
 } from "../controllers/usersController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
-import multer from "multer";
-import path from "path";
+import { avatarUploader } from "../middlewares/uploadMiddleware.js";
 
 const router = Router();
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/avatars");
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, req.user.id + ext);
-  },
-});
-const upload = multer({ storage });
-
-router.patch("/avatar", authMiddleware, upload.single("avatar"), updateAvatar);
+router.patch(
+  "/avatar",
+  authMiddleware,
+  avatarUploader.single("avatar"),
+  updateAvatar
+);
 
 router.get("/me", authMiddleware, getMe);
 router.get("/followers", authMiddleware, getFollowers);
