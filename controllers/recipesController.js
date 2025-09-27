@@ -114,3 +114,16 @@ export const getFavorites = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getRecipesByCategoryId = async (req, res, next) => {
+  try {
+    const { categoryId } = req.params;
+    const { page = 1, limit = 12 } = req.query;
+    const pagination = { page, limit };
+
+    const result = await recipesService.getRecipesByCategoryId(categoryId, pagination);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
