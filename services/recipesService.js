@@ -1,6 +1,5 @@
 import Recipe from "../models/recipe.js";
 import User from "../models/user.js";
-import Category from "../models/category.js";
 import {Op} from "sequelize";
 import sequelize from "../db/sequelize.js";
 
@@ -24,12 +23,18 @@ export const searchRecipes = async (filters = {}, pagination = {}) => {
     whereClause[Op.or] = [
       { title: { [Op.iLike]: `%${q}%` } },
       { description: { [Op.iLike]: `%${q}%` } },
-      { instructions: { [Op.iLike]: `%${q}%` } }
+      { instructions: { [Op.iLike]: `%${q}%` } },
+      sequelize.where(
+        sequelize.fn('array_to_string', sequelize.col('ingredients'), ' '),
+        { [Op.iLike]: `%${q}%` }
+      )
     ];
   }
 
   if (ingredient) {
-    whereClause.instructions = { [Op.iLike]: `%${ingredient}%` };
+    whereClause.ingredients = {
+      [Op.overlap]: [ingredient]
+    };
   }
 
   const { count, rows } = await Recipe.findAndCountAll({
@@ -193,35 +198,5 @@ export const getUserFavorites = async (userId, pagination = {}) => {
     total: user.favorites.length,
     page: parseInt(page),
     limit: parseInt(limit)
-  };
-};
-
-export const getRecipesByCategoryId = async (categoryId, pagination = {}) => {
-  const { page = 1, limit = 12 } = pagination;
-  const offset = (page - 1) * limit;
-
-  // First, find the category by ID to get its name
-  const category = await Category.findByPk(categoryId);
-
-  if (!category) {
-    throw new Error("Category not found");
-  }
-
-  // Then find recipes that match this category name
-  const { count, rows } = await Recipe.findAndCountAll({
-    where: {
-      category: category.name
-    },
-    limit: parseInt(limit),
-    offset: parseInt(offset),
-    order: [['createdAt', 'DESC']]
-  });
-
-  return {
-    items: rows,
-    total: count,
-    page: parseInt(page),
-    limit: parseInt(limit),
-    category: category.name
   };
 };
