@@ -17,6 +17,11 @@ const Recipe = sequelize.define(
       allowNull: false,
       defaultValue: 0
     },
+    ingredients: {
+        type: DataTypes.ARRAY(DataTypes.STRING),
+        allowNull: false,
+        defaultValue: []
+    }
   },
   {
     timestamps: true,
