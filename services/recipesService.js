@@ -1,24 +1,21 @@
 import Recipe from "../models/recipe.js";
 import User from "../models/user.js";
-import {Op} from "sequelize";
+import Category from "../models/category.js";
+import { Op } from "sequelize";
 import sequelize from "../db/sequelize.js";
+import { paginatedResultDto } from "../helpers/pagination.js";
 
 export const searchRecipes = async (filters = {}, pagination = {}) => {
   const { category, ingredient, area, q } = filters;
   const { page = 1, limit = 12 } = pagination;
-
   const offset = (page - 1) * limit;
-
   const whereClause = {};
-
   if (category) {
     whereClause.category = { [Op.iLike]: `%${category}%` };
   }
-
   if (area) {
     whereClause.area = { [Op.iLike]: `%${area}%` };
   }
-
   if (q) {
     whereClause[Op.or] = [
       { title: { [Op.iLike]: `%${q}%` } },
@@ -30,26 +27,23 @@ export const searchRecipes = async (filters = {}, pagination = {}) => {
       )
     ];
   }
-
   if (ingredient) {
     whereClause.ingredients = {
       [Op.overlap]: [ingredient]
     };
   }
-
   const { count, rows } = await Recipe.findAndCountAll({
     where: whereClause,
     limit: parseInt(limit),
     offset: parseInt(offset),
     order: [['createdAt', 'DESC']]
   });
-
-  return {
-    items: rows,
-    total: count,
-    page: parseInt(page),
-    limit: parseInt(limit)
-  };
+  return paginatedResultDto(
+    rows,
+    count,
+    parseInt(page),
+    parseInt(limit)
+  );
 };
 
 export const getRecipeById = async (id) => {
@@ -59,7 +53,6 @@ export const getRecipeById = async (id) => {
 export const getPopularRecipes = async (pagination = {}) => {
   const { page = 1, limit = 12 } = pagination;
   const offset = (page - 1) * limit;
-
   const { count, rows } = await Recipe.findAndCountAll({
     order: [
       ['favoritesCount', 'DESC'],
@@ -68,13 +61,12 @@ export const getPopularRecipes = async (pagination = {}) => {
     limit: parseInt(limit),
     offset: parseInt(offset)
   });
-
-  return {
-    items: rows,
-    total: count,
-    page: parseInt(page),
-    limit: parseInt(limit)
-  };
+  return paginatedResultDto(
+    rows,
+    count,
+    parseInt(page),
+    parseInt(limit)
+  );
 };
 
 export const createRecipe = async (recipeData, userId) => {
@@ -101,20 +93,18 @@ export const deleteRecipe = async (id, userId) => {
 export const getUserRecipes = async (userId, pagination = {}) => {
   const { page = 1, limit = 12 } = pagination;
   const offset = (page - 1) * limit;
-
   const { count, rows } = await Recipe.findAndCountAll({
     where: { owner: userId },
     limit: parseInt(limit),
     offset: parseInt(offset),
     order: [['createdAt', 'DESC']]
   });
-
-  return {
-    items: rows,
-    total: count,
-    page: parseInt(page),
-    limit: parseInt(limit)
-  };
+  return paginatedResultDto(
+    rows,
+    count,
+    parseInt(page),
+    parseInt(limit)
+  );
 };
 
 export const addToFavorites = async (userId, recipeId) => {
@@ -179,12 +169,10 @@ export const removeFromFavorites = async (userId, recipeId) => {
 export const getUserFavorites = async (userId, pagination = {}) => {
   const { page = 1, limit = 12 } = pagination;
   const offset = (page - 1) * limit;
-
   const user = await User.findByPk(userId);
   if (!user) {
     throw new Error('User not found');
   }
-
   const favoriteIds = user.favorites.slice(offset, offset + parseInt(limit));
   const recipes = await Recipe.findAll({
     where: {
@@ -192,11 +180,37 @@ export const getUserFavorites = async (userId, pagination = {}) => {
     },
     order: [['favoritesCount', 'DESC'], ['createdAt', 'DESC']]
   });
-
-  return {
-    items: recipes,
-    total: user.favorites.length,
-    page: parseInt(page),
-    limit: parseInt(limit)
-  };
+  return paginatedResultDto(
+    recipes,
+    user.favorites.length,
+    parseInt(page),
+    parseInt(limit)
+  );
 };
+
+export const getRecipesByCategoryId = async (categoryId, pagination = {}) => {
+  const { page = 1, limit = 12 } = pagination;
+  const offset = (page - 1) * limit;
+  // First, find the category by ID to get its name
+  const category = await Category.findByPk(categoryId);
+  if (!category) {
+    throw new Error("Category not found");
+  }
+  // Then find recipes that match this category name
+  const { count, rows } = await Recipe.findAndCountAll({
+    where: {
+      category: category.name
+    },
+    limit: parseInt(limit),
+    offset: parseInt(offset),
+    order: [['createdAt', 'DESC']]
+  });
+  return paginatedResultDto(
+    rows,
+    count,
+    parseInt(page),
+    parseInt(limit),
+    { category: category.name }
+  );
+};
+

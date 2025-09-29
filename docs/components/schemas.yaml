@@ -98,6 +98,19 @@ Category:
 
 PaginatedRecipes:
   type: object
+  description: |
+    Unified paginated response for endpoints returning lists of recipes. Always includes:
+      - total: total number of items matching the query
+      - page: current page number (starts from 1)
+      - pageSize: number of items per page (limit)
+      - items: array of recipe objects for the current page
+    Example:
+      {
+        "total": 150,
+        "page": 2,
+        "pageSize": 12,
+        "items": [ ... ]
+      }
   properties:
     items:
       type: array
@@ -106,12 +119,15 @@ PaginatedRecipes:
     total:
       type: integer
       example: 150
+      description: Total number of items matching the query
     page:
       type: integer
       example: 1
-    limit:
+      description: Current page number (starts from 1)
+    pageSize:
       type: integer
       example: 12
+      description: Number of items per page (limit)
 
 Review:
   type: object
@@ -143,13 +159,15 @@ ReviewRequest:
       example: Додав би більше солі :)
 
 # 🔄 Параметри для перевикористання
+
 PageParam:
   in: query
   name: page
   schema:
     type: integer
     minimum: 1
-  description: Номер сторінки
+  description: |
+    Page number for paginated results (starts from 1). Default is 1.
   example: 1
 
 LimitParam:
@@ -158,6 +176,7 @@ LimitParam:
   schema:
     type: integer
     minimum: 1
-    maximum: 100
-  description: Кількість елементів на сторінці
-  example: 10
+    maximum: 50
+  description: |
+    Number of items per page (page size). Default is 12. Maximum is 50.
+  example: 12

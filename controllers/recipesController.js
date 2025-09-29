@@ -1,9 +1,11 @@
 import * as recipesService from "../services/recipesService.js";
 import HttpError from "../helpers/HttpError.js";
+import { parsePagination } from "../helpers/pagination.js";
 
 export const getRecipes = async (req, res, next) => {
   try {
-    const { category, ingredient, area, q, page = 1, limit = 12 } = req.query;
+    const { category, ingredient, area, q } = req.query;
+    const { page, limit } = parsePagination(req.query);
     const filters = { category, ingredient, area, q };
     const pagination = { page, limit };
     const result = await recipesService.searchRecipes(filters, pagination);
@@ -28,7 +30,7 @@ export const getRecipeById = async (req, res, next) => {
 
 export const getPopularRecipes = async (req, res, next) => {
   try {
-    const { page = 1, limit = 12 } = req.query;
+    const { page, limit } = parsePagination(req.query);
     const pagination = { page, limit };
     const result = await recipesService.getPopularRecipes(pagination);
     res.json(result);
@@ -68,7 +70,7 @@ export const deleteRecipe = async (req, res, next) => {
 
 export const getMyRecipes = async (req, res, next) => {
   try {
-    const { page = 1, limit = 12 } = req.query;
+    const { page, limit } = parsePagination(req.query);
     const pagination = { page, limit };
     const result = await recipesService.getUserRecipes(req.user.id, pagination);
     res.json(result);
@@ -106,9 +108,22 @@ export const removeFromFavorites = async (req, res, next) => {
 
 export const getFavorites = async (req, res, next) => {
   try {
-    const { page = 1, limit = 12 } = req.query;
+    const { page, limit } = parsePagination(req.query);
     const pagination = { page, limit };
     const result = await recipesService.getUserFavorites(req.user.id, pagination);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const getRecipesByCategoryId = async (req, res, next) => {
+  try {
+    const { categoryId } = req.params;
+    const { page, limit } = parsePagination(req.query);
+    const pagination = { page, limit };
+    const result = await recipesService.getRecipesByCategoryId(categoryId, pagination);
     res.json(result);
   } catch (error) {
     next(error);
