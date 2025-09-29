@@ -7,7 +7,6 @@ const router = express.Router();
 
 router.get("/", recipesController.getRecipes);
 router.get("/popular", recipesController.getPopularRecipes);
-router.get("/category/:categoryId", recipesController.getRecipesByCategoryId);
 router.get("/my", authMiddleware, recipesController.getMyRecipes);
 router.get("/:id", recipesController.getRecipeById);
 router.post(

@@ -117,6 +117,7 @@ export const getFavorites = async (req, res, next) => {
   }
 };
 
+
 export const getRecipesByCategoryId = async (req, res, next) => {
   try {
     const { categoryId } = req.params;
@@ -128,3 +129,4 @@ export const getRecipesByCategoryId = async (req, res, next) => {
     next(error);
   }
 };
+

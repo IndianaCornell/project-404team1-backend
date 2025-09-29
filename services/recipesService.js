@@ -20,11 +20,17 @@ export const searchRecipes = async (filters = {}, pagination = {}) => {
     whereClause[Op.or] = [
       { title: { [Op.iLike]: `%${q}%` } },
       { description: { [Op.iLike]: `%${q}%` } },
-      { instructions: { [Op.iLike]: `%${q}%` } }
+      { instructions: { [Op.iLike]: `%${q}%` } },
+      sequelize.where(
+        sequelize.fn('array_to_string', sequelize.col('ingredients'), ' '),
+        { [Op.iLike]: `%${q}%` }
+      )
     ];
   }
   if (ingredient) {
-    whereClause.instructions = { [Op.iLike]: `%${ingredient}%` };
+    whereClause.ingredients = {
+      [Op.overlap]: [ingredient]
+    };
   }
   const { count, rows } = await Recipe.findAndCountAll({
     where: whereClause,
@@ -207,3 +213,4 @@ export const getRecipesByCategoryId = async (categoryId, pagination = {}) => {
     { category: category.name }
   );
 };
+
