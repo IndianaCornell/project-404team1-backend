@@ -1,0 +1,15 @@
+ingredients-collection:
+  get:
+    summary: Get all ingredients
+    description: Повертає список усіх інгредієнтів (публічно)
+    tags: [Ingredients]
+    parameters:
+      - $ref: ../components/schemas.yaml#/PageParam
+      - $ref: ../components/schemas.yaml#/LimitParam
+    responses:
+      "200":
+        description: Список інгредієнтів
+        content:
+          application/json:
+            schema:
+              $ref: ../components/schemas.yaml#/PaginatedIngredients
