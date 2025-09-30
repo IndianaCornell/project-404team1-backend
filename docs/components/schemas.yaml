@@ -158,6 +158,43 @@ ReviewRequest:
       type: string
       example: Додав би більше солі :)
 
+Ingredient:
+  type: object
+  properties:
+    id:
+      type: string
+      example: "640c2dd963a319ea671e383b"
+    name:
+      type: string
+      example: "Ackee"
+    desc:
+      type: string
+      example: "A fruit that is native to West Africa, often used in Jamaican dishes."
+    img:
+      type: string
+      format: uri
+      example: "https://ftp.goit.study/img/so-yummy/ingredients/640c2dd963a319ea671e383b.png"
+
+PaginatedIngredients:
+  type: object
+  properties:
+    items:
+      type: array
+      items:
+        $ref: "#/Ingredient"
+    total:
+      type: integer
+      example: 574
+      description: Total number of ingredients matching the query
+    page:
+      type: integer
+      example: 1
+      description: Current page number (starts from 1)
+    limit:
+      type: integer
+      example: 12
+      description: Number of items per page (page size)
+
 # 🔄 Параметри для перевикористання
 
 PageParam:

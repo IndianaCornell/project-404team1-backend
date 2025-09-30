@@ -26,6 +26,8 @@ tags:
     description: Улюблені рецепти
   - name: Reviews
     description: Відгуки на рецепти
+  - name: Ingredients
+    description: Список інгредієнтів
 
 paths:
   /auth/register:
@@ -52,6 +54,8 @@ paths:
     $ref: ./paths/reviews.yaml#/reviews-recipe
   /favorites:
     $ref: ./paths/favorites.yaml#/favorites-collection
+  /ingredients:
+    $ref: ./paths/ingredients.yaml#/ingredients-collection
 
 components:
   securitySchemes:
