@@ -7,6 +7,19 @@ import Recipe from "../../models/recipe.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const DEFAULT_OWNER_ID = "00000000-0000-0000-0000-000000000000";
+
+function extractOwner(o) {
+  if (o == null) return null;
+  if (typeof o === "string" || typeof o === "number") return String(o);
+  // типові варіанти з Mongo / довільних структур:
+  if (o.$oid) return String(o.$oid);
+  if (o._id?.$oid) return String(o._id.$oid);
+  if (o._id) return String(o._id);
+  if (o.id) return String(o.id);
+  return null; // не змогли витягти
+}
+
 async function seedRecipes() {
   try {
     await sequelize.authenticate();
@@ -18,6 +31,8 @@ async function seedRecipes() {
     const recipes = JSON.parse(raw);
 
     for (const r of recipes) {
+const ownerStr = extractOwner(r.owner) ?? DEFAULT_OWNER_ID;
+
       await Recipe.create({
         title: r.title,
         category: r.category,
@@ -28,6 +43,8 @@ async function seedRecipes() {
         time: r.time,
         createdAt: new Date(parseInt(r.createdAt?.$date?.$numberLong ?? Date.now())),
         updatedAt: new Date(parseInt(r.updatedAt?.$date?.$numberLong ?? Date.now())),
+        owner: ownerStr,
+
       });
     }
 
