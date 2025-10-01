@@ -33,11 +33,18 @@ export const searchRecipes = async (filters = {}, pagination = {}) => {
     };
   }
   const { count, rows } = await Recipe.findAndCountAll({
-    where: whereClause,
-    limit: parseInt(limit),
-    offset: parseInt(offset),
-    order: [['createdAt', 'DESC']]
-  });
+  where: whereClause,
+  limit: parseInt(limit),
+  offset: parseInt(offset),
+  order: [["createdAt", "DESC"]],
+  include: [
+    {
+      model: User,
+      as: "author",
+      attributes: ["id", "name", "avatar"],
+    },
+  ],
+});
   return paginatedResultDto(
     rows,
     count,

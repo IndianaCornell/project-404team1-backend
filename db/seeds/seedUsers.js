@@ -2,6 +2,7 @@ import "dotenv/config";
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import bcrypt from "bcrypt";
 
 import sequelize from "../sequelize.js";
 import User from "../../models/user.js";
@@ -19,16 +20,26 @@ const jsonPath = path.resolve(__dirname, "../users.json");
     const raw = fs.readFileSync(jsonPath, "utf-8");
     const input = JSON.parse(raw);
 
-    const rows = input.map((u) => ({
-      id: u._id?.$oid ?? u._id,
-      name: u.name,
-      avatar: u.avatar,
-      email: u.email,
-      followers: u.followers || [],
-      following: u.following || [],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    }));
+    // формуємо масив для bulkCreate
+    const rows = await Promise.all(
+      input.map(async (u) => {
+        const id = u._id?.$oid ?? u._id;
+        const hashedPassword = await bcrypt.hash("123", 10);
+
+        return {
+          id,
+          name: u.name,
+          avatar: u.avatar || `https://i.pravatar.cc/150?u=${id}`,
+          email: u.email,
+          followers: u.followers || [],
+          following: u.following || [],
+          favorites: [],
+          password: hashedPassword,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+      })
+    );
 
     await User.bulkCreate(rows, { ignoreDuplicates: true });
 
@@ -39,4 +50,5 @@ const jsonPath = path.resolve(__dirname, "../users.json");
     process.exit(1);
   }
 })();
+
 //щоб зробити таблицю на завантажити данні виконай node db/seeds/seedUsers.js
