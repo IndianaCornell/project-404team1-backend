@@ -1,5 +1,6 @@
 import {DataTypes} from "sequelize";
 import sequelize from "../db/sequelize.js";
+import User from "./user.js";
 
 const Recipe = sequelize.define(
   "Recipe",
@@ -27,5 +28,11 @@ const Recipe = sequelize.define(
     timestamps: true,
   }
 );
+
+Recipe.belongsTo(User, {
+  as: "author",
+  foreignKey: "owner",
+  targetKey: "id"
+});
 
 export default Recipe;
