@@ -115,61 +115,71 @@ export const getUserRecipes = async (userId, pagination = {}) => {
 };
 
 export const addToFavorites = async (userId, recipeId) => {
-  const transaction = await sequelize.transaction();
-
+  const tx = await sequelize.transaction();
   try {
-    const user = await User.findByPk(userId, { transaction });
-    if (!user) {
-      throw new Error('User not found');
+    const user = await User.findByPk(userId, {
+      transaction: tx,
+      lock: tx.LOCK && tx.LOCK.UPDATE,
+    });
+    if (!user) throw new Error("User not found");
+
+    const recipe = await Recipe.findByPk(recipeId, {
+      transaction: tx,
+      lock: tx.LOCK && tx.LOCK.UPDATE,
+    });
+    if (!recipe) throw new Error("Recipe not found");
+
+    const rid = String(recipeId);
+    const current = Array.isArray(user.favorites) ? user.favorites.map(String) : [];
+
+    if (!current.includes(rid)) {
+      user.set("favorites", [...current, rid]);
+      await user.save({ transaction: tx });
+      await recipe.increment("favoritesCount", { by: 1, transaction: tx });
     }
 
-    const recipe = await Recipe.findByPk(recipeId, { transaction });
-    if (!recipe) {
-      throw new Error('Recipe not found');
-    }
-
-    if (!user.favorites.includes(recipeId)) {
-      user.favorites.push(recipeId);
-      await user.save({ transaction });
-
-      await recipe.increment('favoritesCount', { by: 1, transaction });
-    }
-
-    await transaction.commit();
+    await tx.commit();
     return true;
-  } catch (error) {
-    await transaction.rollback();
-    throw error;
+  } catch (err) {
+    await tx.rollback();
+    throw err;
   }
 };
 
 export const removeFromFavorites = async (userId, recipeId) => {
-  const transaction = await sequelize.transaction();
-
+  const tx = await sequelize.transaction();
   try {
-    const user = await User.findByPk(userId, { transaction });
-    if (!user) {
-      throw new Error('User not found');
+    // Рядкові locks зменшують гонки (Postgres)
+    const user = await User.findByPk(userId, {
+      transaction: tx,
+      lock: tx.LOCK && tx.LOCK.UPDATE,
+    });
+    if (!user) throw new Error("User not found");
+
+    const recipe = await Recipe.findByPk(recipeId, {
+      transaction: tx,
+      lock: tx.LOCK && tx.LOCK.UPDATE,
+    });
+    if (!recipe) throw new Error("Recipe not found");
+
+    const rid = String(recipeId);
+    const current = Array.isArray(user.favorites) ? user.favorites.map(String) : [];
+
+    if (current.includes(rid)) {
+      const next = current.filter((x) => x !== rid);
+      user.set("favorites", next);
+      await user.save({ transaction: tx });
+
+      if ((recipe.favoritesCount ?? 0) > 0) {
+        await recipe.decrement("favoritesCount", { by: 1, transaction: tx });
+      }
     }
 
-    const recipe = await Recipe.findByPk(recipeId, { transaction });
-    if (!recipe) {
-      throw new Error('Recipe not found');
-    }
-
-    const index = user.favorites.indexOf(recipeId);
-    if (index > -1) {
-      user.favorites.splice(index, 1);
-      await user.save({ transaction });
-
-      await recipe.decrement('favoritesCount', { by: 1, transaction });
-    }
-
-    await transaction.commit();
+    await tx.commit();
     return true;
-  } catch (error) {
-    await transaction.rollback();
-    throw error;
+  } catch (err) {
+    await tx.rollback();
+    throw err;
   }
 };
 
