@@ -4,7 +4,7 @@ import authMiddleware from "../middlewares/authMiddleware.js";
 import { recipieImageUploader } from "../middlewares/uploadMiddleware.js";
 
 const router = express.Router();
-
+router.get("/favorites/all",recipesController.getFavorites);
 router.get("/", recipesController.getRecipes);
 router.get("/popular", recipesController.getPopularRecipes);
 router.get("/my", authMiddleware, recipesController.getMyRecipes);

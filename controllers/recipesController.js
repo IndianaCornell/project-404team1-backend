@@ -110,7 +110,17 @@ export const getFavorites = async (req, res, next) => {
   try {
     const { page, limit } = parsePagination(req.query);
     const pagination = { page, limit };
-    const result = await recipesService.getUserFavorites(req.user.id, pagination);
+
+    const requestedUserId = req.query.userId;         
+
+    let targetUserId;
+
+    if (requestedUserId) {
+      targetUserId = requestedUserId;
+    }else {
+      return res.status(400).json({ message: "userId is required" });
+    }
+    const result = await recipesService.getUserFavorites(targetUserId, pagination);
     res.json(result);
   } catch (error) {
     next(error);
