@@ -20,6 +20,9 @@ export const updateAvatar = async (user, file) => {
 
 export const getMe = async (user) => {
   const createdRecipesCount = await Recipe.count({ where: { owner: user.id } });
+  const favorites = Array.isArray(user.favorites)
+    ? user.favorites.map(String)
+    : [];
   return {
     avatar: user.avatar,
     name: user.name,
@@ -28,6 +31,7 @@ export const getMe = async (user) => {
     favoritesCount: user.favorites.length,
     followersCount: user.followers.length,
     followingCount: user.following.length,
+    favorites : favorites,
   };
 };
 
@@ -82,14 +86,30 @@ export const unfollowUser = async (currentUser, targetUserId) => {
 };
 
 export const getUserById = async (id) => {
-  const user = await User.findByPk(id);
+  const user = await User.findByPk(id, {
+    attributes: ["id", "avatar", "name", "email", "favorites", "followers"],
+  });
   if (!user) throw { status: 404, message: "User not found" };
-  const createdRecipesCount = await Recipe.count({ where: { owner: user.id } });
+
+  const createdRecipesCount = await Recipe.count({
+    where: { owner: String(user.id) },
+  });
+
+  const favorites = Array.isArray(user.favorites)
+    ? user.favorites.map(String)
+    : [];
+
+  const followersCount = Array.isArray(user.followers)
+    ? user.followers.length
+    : 0;
+
   return {
     avatar: user.avatar,
     name: user.name,
     email: user.email,
     createdRecipesCount,
-    followersCount: user.followers.length,
+    followersCount,
+    favorites,
+    favoritesCount: favorites.length,
   };
 };

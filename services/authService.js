@@ -53,6 +53,10 @@ export const login = async (payload) => {
   const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
     expiresIn: "24h",
   });
+const favorites = Array.isArray(user.favorites)
+    ? user.favorites.map(String)
+    : [];
+
   return {
     token,
     user: {
@@ -60,6 +64,8 @@ export const login = async (payload) => {
       name: user.name,
       email: user.email,
       avatar: user.avatar,
+      favorites,
+      favoritesCount: favorites.length, 
     },
   };
 };
