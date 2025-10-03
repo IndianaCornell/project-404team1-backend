@@ -25,6 +25,6 @@ router.get("/followers", authMiddleware, getFollowers);
 router.get("/following", authMiddleware, getFollowing);
 router.post("/follow/:id", authMiddleware, followUser);
 router.delete("/follow/:id", authMiddleware, unfollowUser);
-router.get(":id", authMiddleware, getUserById);
+router.get("/:id", authMiddleware, getUserById);
 
 export default router;

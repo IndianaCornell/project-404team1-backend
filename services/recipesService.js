@@ -173,26 +173,42 @@ export const removeFromFavorites = async (userId, recipeId) => {
   }
 };
 
+const toIntIds = (arr) => {
+  const ids = (Array.isArray(arr) ? arr : [])
+    .map((x) => String(x).trim())
+    .filter((x) => /^\d+$/.test(x))
+    .map((x) => parseInt(x, 10));
+
+  return Array.from(new Set(ids));
+};
+
 export const getUserFavorites = async (userId, pagination = {}) => {
-  const { page = 1, limit = 12 } = pagination;
+  const page = Math.max(1, parseInt(pagination.page ?? 1, 10) || 1);
+  const limit = Math.max(1, parseInt(pagination.limit ?? 12, 10) || 12);
   const offset = (page - 1) * limit;
-  const user = await User.findByPk(userId);
+
+  const user = await User.findByPk(userId, { attributes: ["favorites"] });
   if (!user) {
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
-  const favoriteIds = user.favorites.slice(offset, offset + parseInt(limit));
-  const recipes = await Recipe.findAll({
-    where: {
-      id: { [Op.in]: favoriteIds }
-    },
-    order: [['favoritesCount', 'DESC'], ['createdAt', 'DESC']]
+
+  const ids = toIntIds(user.favorites);
+
+  if (ids.length === 0) {
+    return paginatedResultDto([], 0, page, limit);
+  }
+
+  const { rows, count } = await Recipe.findAndCountAll({
+    where: { id: { [Op.in]: ids } },
+    order: [
+      ["favoritesCount", "DESC"],
+      ["createdAt", "DESC"],
+    ],
+    limit,
+    offset,
   });
-  return paginatedResultDto(
-    recipes,
-    user.favorites.length,
-    parseInt(page),
-    parseInt(limit)
-  );
+
+  return paginatedResultDto(rows, count, page, limit);
 };
 
 export const getRecipesByCategoryId = async (categoryId, pagination = {}) => {
