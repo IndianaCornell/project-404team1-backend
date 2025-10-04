@@ -26,3 +26,12 @@ export const logout = async (req, res, next) => {
     next(e);
   }
 };
+
+export const getCurrent = async (req, res, next) => {
+  try {
+    const data = await service.current(req.user.id);
+    res.json(data); // { id, name, email, avatar, favorites, favoritesCount }
+  } catch (e) {
+    next(e);
+  }
+};
