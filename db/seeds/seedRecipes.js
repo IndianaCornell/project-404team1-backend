@@ -41,6 +41,7 @@ const ownerStr = extractOwner(r.owner) ?? DEFAULT_OWNER_ID;
         description: r.description,
         thumb: r.thumb,
         time: r.time,
+        ingredients: r.ingredients || [],
         createdAt: new Date(parseInt(r.createdAt?.$date?.$numberLong ?? Date.now())),
         updatedAt: new Date(parseInt(r.updatedAt?.$date?.$numberLong ?? Date.now())),
         owner: ownerStr,

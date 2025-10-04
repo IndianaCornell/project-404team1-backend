@@ -22,39 +22,42 @@ export const searchRecipes = async (filters = {}, pagination = {}) => {
       { description: { [Op.iLike]: `%${q}%` } },
       { instructions: { [Op.iLike]: `%${q}%` } },
       sequelize.where(
-        sequelize.fn('array_to_string', sequelize.col('ingredients'), ' '),
+        sequelize.fn("array_to_string", sequelize.col("ingredients"), " "),
         { [Op.iLike]: `%${q}%` }
-      )
+      ),
     ];
   }
   if (ingredient) {
     whereClause.ingredients = {
-      [Op.overlap]: [ingredient]
+      [Op.overlap]: [ingredient],
     };
   }
   const { count, rows } = await Recipe.findAndCountAll({
-  where: whereClause,
-  limit: parseInt(limit),
-  offset: parseInt(offset),
-  order: [["createdAt", "DESC"]],
-  include: [
-    {
-      model: User,
-      as: "author",
-      attributes: ["id", "name", "avatar"],
-    },
-  ],
-});
-  return paginatedResultDto(
-    rows,
-    count,
-    parseInt(page),
-    parseInt(limit)
-  );
+    where: whereClause,
+    limit: parseInt(limit),
+    offset: parseInt(offset),
+    order: [["createdAt", "DESC"]],
+    include: [
+      {
+        model: User,
+        as: "author",
+        attributes: ["id", "name", "avatar"],
+      },
+    ],
+  });
+  return paginatedResultDto(rows, count, parseInt(page), parseInt(limit));
 };
 
 export const getRecipeById = async (id) => {
-  return await Recipe.findByPk(id);
+  return await Recipe.findByPk(id, {
+    include: [
+      {
+        model: User,
+        as: "author",
+        attributes: ["id", "name", "avatar"],
+      },
+    ],
+  });
 };
 
 export const getPopularRecipes = async (pagination = {}) => {
@@ -62,35 +65,30 @@ export const getPopularRecipes = async (pagination = {}) => {
   const offset = (page - 1) * limit;
   const { count, rows } = await Recipe.findAndCountAll({
     order: [
-      ['favoritesCount', 'DESC'],
-      ['createdAt', 'DESC']
+      ["favoritesCount", "DESC"],
+      ["createdAt", "DESC"],
     ],
     limit: parseInt(limit),
-    offset: parseInt(offset)
+    offset: parseInt(offset),
   });
-  return paginatedResultDto(
-    rows,
-    count,
-    parseInt(page),
-    parseInt(limit)
-  );
+  return paginatedResultDto(rows, count, parseInt(page), parseInt(limit));
 };
 
 export const createRecipe = async (recipeData, userId) => {
   return await Recipe.create({
     ...recipeData,
-    owner: userId
+    owner: userId,
   });
 };
 
 export const deleteRecipe = async (id, userId) => {
   const recipe = await Recipe.findByPk(id);
   if (!recipe) {
-    throw new Error('Recipe not found');
+    throw new Error("Recipe not found");
   }
 
   if (recipe.owner !== userId) {
-    throw new Error('Forbidden: You can only delete your own recipes');
+    throw new Error("Forbidden: You can only delete your own recipes");
   }
 
   await recipe.destroy();
@@ -104,14 +102,9 @@ export const getUserRecipes = async (userId, pagination = {}) => {
     where: { owner: userId },
     limit: parseInt(limit),
     offset: parseInt(offset),
-    order: [['createdAt', 'DESC']]
+    order: [["createdAt", "DESC"]],
   });
-  return paginatedResultDto(
-    rows,
-    count,
-    parseInt(page),
-    parseInt(limit)
-  );
+  return paginatedResultDto(rows, count, parseInt(page), parseInt(limit));
 };
 
 export const addToFavorites = async (userId, recipeId) => {
@@ -130,7 +123,9 @@ export const addToFavorites = async (userId, recipeId) => {
     if (!recipe) throw new Error("Recipe not found");
 
     const rid = String(recipeId);
-    const current = Array.isArray(user.favorites) ? user.favorites.map(String) : [];
+    const current = Array.isArray(user.favorites)
+      ? user.favorites.map(String)
+      : [];
 
     if (!current.includes(rid)) {
       user.set("favorites", [...current, rid]);
@@ -149,7 +144,6 @@ export const addToFavorites = async (userId, recipeId) => {
 export const removeFromFavorites = async (userId, recipeId) => {
   const tx = await sequelize.transaction();
   try {
-    // Рядкові locks зменшують гонки (Postgres)
     const user = await User.findByPk(userId, {
       transaction: tx,
       lock: tx.LOCK && tx.LOCK.UPDATE,
@@ -163,7 +157,9 @@ export const removeFromFavorites = async (userId, recipeId) => {
     if (!recipe) throw new Error("Recipe not found");
 
     const rid = String(recipeId);
-    const current = Array.isArray(user.favorites) ? user.favorites.map(String) : [];
+    const current = Array.isArray(user.favorites)
+      ? user.favorites.map(String)
+      : [];
 
     if (current.includes(rid)) {
       const next = current.filter((x) => x !== rid);
@@ -232,18 +228,13 @@ export const getRecipesByCategoryId = async (categoryId, pagination = {}) => {
   // Then find recipes that match this category name
   const { count, rows } = await Recipe.findAndCountAll({
     where: {
-      category: category.name
+      category: category.name,
     },
     limit: parseInt(limit),
     offset: parseInt(offset),
-    order: [['createdAt', 'DESC']]
+    order: [["createdAt", "DESC"]],
   });
-  return paginatedResultDto(
-    rows,
-    count,
-    parseInt(page),
-    parseInt(limit),
-    { category: category.name }
-  );
+  return paginatedResultDto(rows, count, parseInt(page), parseInt(limit), {
+    category: category.name,
+  });
 };
-
