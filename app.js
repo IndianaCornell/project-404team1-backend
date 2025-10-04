@@ -3,7 +3,6 @@ import morgan from "morgan";
 import cors from "cors";
 
 import "dotenv/config";
-import "./db/sequelize.js";
 
 import authRouter from "./routes/authRouter.js";
 import usersRouter from "./routes/usersRouter.js";
