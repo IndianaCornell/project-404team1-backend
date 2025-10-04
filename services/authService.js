@@ -70,6 +70,27 @@ const favorites = Array.isArray(user.favorites)
   };
 };
 
+
+export const current = async (userId) => {
+  if (!userId) throw HttpError(401, "Not authorized");
+
+  const user = await User.findByPk(userId, {
+    attributes: ["id", "name", "email", "avatar", "favorites"],
+  });
+  if (!user) throw HttpError(401, "Not authorized");
+
+  const favorites = Array.isArray(user.favorites) ? user.favorites.map(String) : [];
+
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    avatar: user.avatar,
+    favorites,
+    favoritesCount: favorites.length,
+  };
+};
+
 export const logout = async () => {
   return { message: "logout ok" };
 };
