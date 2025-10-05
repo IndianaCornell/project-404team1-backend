@@ -3,6 +3,8 @@ import Recipe from "../models/recipe.js";
 import { Op } from 'sequelize';
 import HttpError from '../helpers/HttpError.js';
 import { paginatedResultDto } from '../helpers/pagination.js';
+import cloudinary from "../helpers/cloudinary.js";
+
 
 export const getFollowers = async (user) => {
   if (!user.followers || user.followers.length === 0) return [];
@@ -70,10 +72,18 @@ export const getFollowingByUserId = async (
 
 export const updateAvatar = async (user, file) => {
   if (!file) throw { status: 400, message: "No file uploaded" };
-  const avatarUrl = `/avatars/${file.filename}`;
-  user.avatar = avatarUrl;
+
+  // Загружаем файл в Cloudinary
+  const result = await cloudinary.uploader.upload(file.path, {
+    folder: "avatars",
+    public_id: user.id,
+    overwrite: true,
+  });
+
+  user.avatar = result.secure_url;
   await user.save();
-  return { avatar: avatarUrl };
+
+  return { avatar: user.avatar };
 };
 
 export const getMe = async (user) => {
