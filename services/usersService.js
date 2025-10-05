@@ -1,5 +1,10 @@
 import User from "../models/user.js";
 import Recipe from "../models/recipe.js";
+import { Op } from 'sequelize';
+import HttpError from '../helpers/HttpError.js';
+import { paginatedResultDto } from '../helpers/pagination.js';
+import cloudinary from "../helpers/cloudinary.js";
+
 
 export const getFollowers = async (user) => {
   if (!user.followers || user.followers.length === 0) return [];
@@ -10,12 +15,75 @@ export const getFollowers = async (user) => {
   return followers;
 };
 
+export const getFollowersByUserId = async (
+  userId,
+  { page = 1, limit = 12 } = {}
+) => {
+  const user = await User.findByPk(userId);
+  if (!user) throw HttpError(404, 'User not found');
+
+  const p = Number(page) || 1;
+  const l = Number(limit) || 12;
+  const offset = (p - 1) * l;
+
+  const idsAll = (user.followers ?? []).map(String);
+  const total = idsAll.length;
+
+  const idsPage = idsAll.slice(offset, offset + l);
+
+  const items = idsPage.length
+    ? await User.findAll({
+        where: { id: { [Op.in]: idsPage } },
+        attributes: ['id', 'name', 'email', 'avatar'],
+        order: [['createdAt', 'DESC']],
+      })
+    : [];
+
+  return paginatedResultDto(items, total, p, l);
+};
+
+
+export const getFollowingByUserId = async (
+  userId,
+  { page = 1, limit = 12 } = {}
+) => {
+  const user = await User.findByPk(userId);
+  if (!user) throw HttpError(404, 'User not found');
+
+  const p = Number(page) || 1;
+  const l = Number(limit) || 12;
+  const offset = (p - 1) * l;
+
+  const idsAll = (user.following ?? []).map(String);
+  const total = idsAll.length;
+
+  const idsPage = idsAll.slice(offset, offset + l);
+
+  const items = idsPage.length
+    ? await User.findAll({
+        where: { id: { [Op.in]: idsPage } },
+        attributes: ['id', 'name', 'email', 'avatar'],
+        order: [['createdAt', 'DESC']],
+      })
+    : [];
+
+  return paginatedResultDto(items, total, p, l);
+};
+
 export const updateAvatar = async (user, file) => {
   if (!file) throw { status: 400, message: "No file uploaded" };
-  const avatarUrl = `/avatars/${file.filename}`;
-  user.avatar = avatarUrl;
+
+  // Загружаем файл в Cloudinary
+  const result = await cloudinary.uploader.upload(file.path, {
+    folder: "avatars",
+    public_id: user.id,
+    overwrite: true,
+  });
+
+  user.avatar = result.secure_url;
   await user.save();
-  return { avatar: avatarUrl };
+
+  return { avatar: user.avatar };
 };
 
 export const getMe = async (user) => {

@@ -28,6 +28,16 @@ export const getRecipeById = async (req, res, next) => {
   }
 };
 
+export const getByOwner = async (req, res, next) => {
+  try {
+    const { page, limit } = parsePagination(req.query);
+    const data = await recipesService.getRecipesByOwner(req.params.ownerId, { page, limit });
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+};
+
 export const getPopularRecipes = async (req, res, next) => {
   try {
     const { page, limit } = parsePagination(req.query);

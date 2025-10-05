@@ -6,11 +6,35 @@ import {
   getFollowing as getFollowingService,
   followUser as followUserService,
   unfollowUser as unfollowUserService,
+  getFollowersByUserId as getFollowersByUserIdService,
+  getFollowingByUserId as getFollowingByUserIdService,
 } from "../services/usersService.js";
+import { parsePagination } from "../helpers/pagination.js";
+
 
 export const getFollowers = async (req, res, next) => {
   try {
     const data = await getFollowersService(req.user);
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getFollowersByUserId = async (req, res, next) => {
+  try {
+    const { page, limit } = parsePagination(req.query);
+    const data = await getFollowersByUserIdService(req.params.id, { page, limit });
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getFollowingByUserId = async (req, res, next) => {
+  try {
+    const { page, limit } = parsePagination(req.query);
+    const data = await getFollowingByUserIdService(req.params.id, { page, limit });
     res.json(data);
   } catch (err) {
     next(err);
@@ -67,6 +91,7 @@ export const updateAvatar = async (req, res, next) => {
     const data = await updateAvatarService(req.user, req.file);
     res.json(data);
   } catch (err) {
+    console.error("Update avatar error:", err);
     next(err);
   }
 };
