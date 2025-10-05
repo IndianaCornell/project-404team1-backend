@@ -94,6 +94,27 @@ export const getPopularRecipes = async (pagination = {}) => {
   return paginatedResultDto(rows, count, parseInt(page, 10), parseInt(limit, 10));
 };
 
+
+export const getRecipesByOwner = async (ownerId, pagination = {}) => {
+  if (!ownerId) throw new Error('ownerId is required');
+
+  const pageN  = Number(pagination.page  ?? 1);
+  const limitN = Number(pagination.limit ?? 12);
+  const offset = (pageN - 1) * limitN;
+
+  const { count, rows } = await Recipe.findAndCountAll({
+    where: { owner: String(ownerId) },
+    order: [
+      ['createdAt', 'DESC'],
+      ['id', 'ASC'],
+    ],
+    limit: limitN,
+    offset,
+  });
+
+  return paginatedResultDto(rows, count, pageN, limitN);
+};
+
 export const createRecipe = async (recipeData, userId) => {
   return await Recipe.create({
     ...recipeData,
