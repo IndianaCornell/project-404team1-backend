@@ -67,6 +67,7 @@ export const updateAvatar = async (req, res, next) => {
     const data = await updateAvatarService(req.user, req.file);
     res.json(data);
   } catch (err) {
+    console.error("Update avatar error:", err);
     next(err);
   }
 };

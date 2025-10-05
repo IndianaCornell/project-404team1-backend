@@ -8,17 +8,17 @@ const createStorage = (folder) =>
     cloudinary: cloudinary,
     params: {
       folder: folder,
-      allowed_formats: ["jpg", "png", "jpeg"],
+      allowed_formats: ["jpg", "png", "jpeg", "webp"],
       transformation: [{ width: 500, height: 500, crop: "limit" }],
     },
   });
 
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png" || file.mimetype === "image/webp") {
     cb(null, true);
   } else {
     cb(
-      new HttpError(400, "Invalid file type. Only JPEG and PNG are allowed."),
+      new HttpError(400, "Invalid file type. Only JPEG, WEBP and PNG are allowed."),
       false
     );
   }

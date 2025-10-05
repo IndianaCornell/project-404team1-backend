@@ -5,6 +5,7 @@ import User from "../models/user.js";
 import HttpError from "../helpers/HttpError.js";
 import gravatar from "gravatar";
 import Joi from "joi";
+import axios from "axios";
 
 const loginSchema = Joi.object({
   email: Joi.string().email().required(),
@@ -16,6 +17,19 @@ const registerSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(6).max(32).required(),
 });
+
+async function getValidAvatar(avatar, email) {
+  if (!avatar) return gravatar.url(email, { s: "250", d: "retro" }, true);
+  if (avatar.includes("cloudinary.com")) {
+    try {
+      const res = await axios.head(avatar);
+      if (res.status === 200) return avatar;
+    } catch {
+      return gravatar.url(email, { s: "250", d: "retro" }, true);
+    }
+  }
+  return avatar;
+}
 
 export const register = async (payload) => {
   const { error } = registerSchema.validate(payload);
@@ -63,9 +77,9 @@ const favorites = Array.isArray(user.favorites)
       id: user.id,
       name: user.name,
       email: user.email,
-      avatar: user.avatar,
+      avatar: await getValidAvatar(user.avatar, user.email),
       favorites,
-      favoritesCount: favorites.length, 
+      favoritesCount: favorites.length,
     },
   };
 };
@@ -85,7 +99,7 @@ export const current = async (userId) => {
     id: user.id,
     name: user.name,
     email: user.email,
-    avatar: user.avatar,
+    avatar: await getValidAvatar(user.avatar, user.email),
     favorites,
     favoritesCount: favorites.length,
   };
