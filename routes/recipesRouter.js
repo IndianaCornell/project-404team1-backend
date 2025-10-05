@@ -1,7 +1,7 @@
 import express from "express";
 import * as recipesController from "../controllers/recipesController.js";
 import authMiddleware from "../middlewares/authMiddleware.js";
-import { recipieImageUploader } from "../middlewares/uploadMiddleware.js";
+import { recipeImageUploader } from "../middlewares/uploadMiddleware.js";
 
 const router = express.Router();
 router.get("/favorites/all",recipesController.getFavorites);
@@ -13,7 +13,7 @@ router.get('/owner/:ownerId', recipesController.getByOwner);
 router.post(
   "/",
   authMiddleware,
-  recipieImageUploader.single("image"),
+  recipeImageUploader.single("image"),
   recipesController.createRecipe
 );
 router.delete("/:id", authMiddleware, recipesController.deleteRecipe);
