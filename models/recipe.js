@@ -16,13 +16,13 @@ const Recipe = sequelize.define(
     favoritesCount: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 0
+      defaultValue: 0,
     },
     ingredients: {
-        type: DataTypes.ARRAY(DataTypes.STRING),
-        allowNull: false,
-        defaultValue: []
-    }
+      type: DataTypes.ARRAY(DataTypes.STRING),
+      allowNull: false,
+      defaultValue: [],
+    },
   },
   {
     timestamps: true,

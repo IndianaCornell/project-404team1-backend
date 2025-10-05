@@ -41,7 +41,12 @@ export const getPopularRecipes = async (req, res, next) => {
 
 export const createRecipe = async (req, res, next) => {
   try {
-    const recipe = await recipesService.createRecipe(req.body, req.user.id);
+    const data = {
+      ...req.body,
+      thumb: req.file?.path || null,
+    };
+
+    const recipe = await recipesService.createRecipe(data, req.user.id);
     res.status(201).json(recipe);
   } catch (error) {
     next(error);
