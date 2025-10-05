@@ -9,6 +9,7 @@ router.get("/", recipesController.getRecipes);
 router.get("/popular", recipesController.getPopularRecipes);
 router.get("/my", authMiddleware, recipesController.getMyRecipes);
 router.get("/:id", recipesController.getRecipeById);
+router.get('/owner/:ownerId', recipesController.getByOwner);
 router.post(
   "/",
   authMiddleware,
