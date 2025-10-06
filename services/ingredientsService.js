@@ -1,4 +1,5 @@
 import Ingredient from "../models/ingredient.js";
+import sequelize from "../db/sequelize.js";
 import { parsePagination, paginatedResultDto } from "../helpers/pagination.js";
 
 export const getAllIngredients = async (query) => {
@@ -7,7 +8,7 @@ export const getAllIngredients = async (query) => {
 
   const { rows, count } = await Ingredient.findAndCountAll({
     attributes: ["id", "name", "desc", "img"],
-    order: [["name", "ASC"]],
+    order: [[sequelize.fn("LOWER", sequelize.col("name")), "ASC"]],
     offset,
     limit,
   });
